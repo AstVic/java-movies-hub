@@ -22,35 +22,39 @@ public class MovieByIdHandler extends BaseHttpHandler {
             sendError(ex, 400, "Некорректный ID");
             return;
         }
-        if ("GET".equalsIgnoreCase(method)) {
-            store.getById(id)
-                    .map(movie -> {
-                        try {
-                            sendJson(ex, 200, GSON.toJson(movie));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        return movie;
-                    })
-                    .orElseGet(() -> {
-                        try {
-                            sendError(ex, 404, "Фильм не найден");
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        return null;
-                    });
-            return;
-        }
-        if ("DELETE".equalsIgnoreCase(method)) {
-            if (!store.deleteById(id)) {
-                sendError(ex, 404, "Фильм не найден");
+
+        switch (method) {
+            case "GET": {
+                store.getById(id)
+                        .map(movie -> {
+                            try {
+                                sendJson(ex, 200, GSON.toJson(movie));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return movie;
+                        })
+                        .orElseGet(() -> {
+                            try {
+                                sendError(ex, 404, "Фильм не найден");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return null;
+                        });
                 return;
             }
-            sendNoContent(ex);
-            return;
+            case "DELETE": {
+                if (!store.deleteById(id)) {
+                    sendError(ex, 404, "Фильм не найден");
+                    return;
+                }
+                sendNoContent(ex);
+                return;
+            }
+            default:
+                sendError(ex, 405, "Метод не поддерживается");
         }
-        sendError(ex, 405, "Метод не поддерживается");
     }
 
     private Integer parseInt(String value) {

@@ -21,15 +21,18 @@ public class MoviesHandler extends BaseHttpHandler {
     @Override
     public void handle(HttpExchange ex) throws IOException {
         String method = ex.getRequestMethod();
-        if ("GET".equalsIgnoreCase(method)) {
-            handleGet(ex);
-            return;
+        switch (method) {
+            case "GET": {
+                handleGet(ex);
+                return;
+            }
+            case "POST": {
+                handlePost(ex);
+                return;
+            }
+            default:
+                sendError(ex, 405, "Метод не поддерживается");
         }
-        if ("POST".equalsIgnoreCase(method)) {
-            handlePost(ex);
-            return;
-        }
-        sendError(ex, 405, "Метод не поддерживается");
     }
 
     private void handleGet(HttpExchange ex) throws IOException {
@@ -94,10 +97,5 @@ public class MoviesHandler extends BaseHttpHandler {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    static class MovieRequest {
-        String title;
-        Integer year;
     }
 }
